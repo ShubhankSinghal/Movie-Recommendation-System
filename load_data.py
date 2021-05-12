@@ -10,7 +10,7 @@ from collections import defaultdict
 import numpy as np
 
 
-class Data:
+class Load_Data:
 
     # These two dictionaries will be used to fetch id from movieName and vice versa.
     movieID_to_name = {}
@@ -178,3 +178,19 @@ class Data:
             return self.name_to_movieID[movieName]
         else:
             return 0
+
+    def BuildAntiTestSetForUser(testSubject, trainset):
+        """
+
+        """
+        fill = trainset.global_mean
+
+        anti_testset = []
+
+        u = trainset.to_inner_uid(str(testSubject))
+
+        user_items = set([j for (j, _) in trainset.ur[u]])
+        anti_testset += [(trainset.to_raw_uid(u), trainset.to_raw_iid(i), fill) for
+                         i in trainset.all_items() if
+                         i not in user_items]
+        return anti_testset
