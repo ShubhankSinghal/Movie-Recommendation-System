@@ -59,7 +59,7 @@ class Load_Data:
 
     def getUserRatings(self, user):
         """
-          This function will return the userRatings
+          This function will return the list of tuple (movieId, userRatings)
         """
 
         # initialising with default values
@@ -179,18 +179,31 @@ class Load_Data:
         else:
             return 0
 
-    def BuildAntiTestSetForUser(testSubject, trainset):
-        """
 
-        """
-        fill = trainset.global_mean
+def BuildAntiTestSetForUser(testSubject, trainset):
+    """
+        This function returns the anti_dataset, 
+        excludes the movies that the testSubject has given rating to.
+    """
+    # global_mean: The mean of all ratings μ.
+    fill = trainset.global_mean
+    print(trainset)
 
-        anti_testset = []
+    anti_testset = []
 
-        u = trainset.to_inner_uid(str(testSubject))
+    # to_inner_uid: Convert a user raw id to an inner id.
+    u = trainset.to_inner_uid(str(testSubject))
 
-        user_items = set([j for (j, _) in trainset.ur[u]])
-        anti_testset += [(trainset.to_raw_uid(u), trainset.to_raw_iid(i), fill) for
-                         i in trainset.all_items() if
-                         i not in user_items]
-        return anti_testset
+    # ur: The users ratings.
+    # This is a dictionary containing lists of tuples of the form (item_inner_id, rating).
+    # The keys are user inner ids.
+    user_items = set([j for (j, _) in trainset.ur[u]])
+
+    # to_raw_uid: Convert a user inner id to a raw id.
+    # to_raw_iid: Convert an item inner id to a raw id.
+    # all_items: Generator function to iterate over all items.
+    anti_testset += [(trainset.to_raw_uid(u), trainset.to_raw_iid(i), fill) for
+                     i in trainset.all_items() if
+                     i not in user_items]
+
+    return anti_testset
