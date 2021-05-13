@@ -1,5 +1,5 @@
-from metrics import Metrics
-from EvaluationData import EvaluationData
+from .metrics import Metrics
+from .EvaluationData import EvaluationData
 
 
 class EvaluatedAlgorithm:
