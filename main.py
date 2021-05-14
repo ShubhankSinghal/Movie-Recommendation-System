@@ -30,8 +30,8 @@ random.seed(0)
 evaluator = Evaluator(evaluationData, rankings)
 
 # Throw in an SVD recommender
-SVDAlgorithm = SVD(random_state=10)
-evaluator.AddAlgorithm(SVDAlgorithm, "SVD")
+# SVDAlgorithm = SVD(random_state=10)
+# evaluator.AddAlgorithm(SVDAlgorithm, "SVD")
 
 contentKNN = ContentKNNAlgorithm()
 evaluator.AddAlgorithm(contentKNN, "ContentKNN")
