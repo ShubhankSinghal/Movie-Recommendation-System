@@ -1,79 +1,22 @@
 # https://surprise.readthedocs.io/en/stable/dataset.html
 
-from framework import load_data as LD
+from framework.load_data import Load_Data
 from surprise import SVD
 from surprise import NormalPredictor
 from framework.Evaluator import Evaluator
+from framework.ContentKNNAlgorithm import ContentKNNAlgorithm
 
 import random
 import numpy as np
 
 
-"""
-# Pick an arbitrary test subject
-testSubject = 2
-
-# create an object to use methods
-ld = LD.Load_Data()
-
-print("Loading movie ratings...")
-data = ld.loadRatingDataset()
-
-userRatings = ld.getUserRatings(testSubject)
-
-loved = []
-hated = []
-for ratings in userRatings:
-    if (float(ratings[1]) > 4.0):
-        loved.append(ratings)
-    if (float(ratings[1]) < 3.0):
-        hated.append(ratings)
-
-print("\nUser: ", testSubject, " loved these movies:")
-for ratings in loved:
-    print(ld.getMovieName(ratings[0]))
-print("\n...and didn't like these movies:")
-for ratings in hated:
-    print(ld.getMovieName(ratings[0]))
-
-
-print("\nBuilding recommendation model...")
-# build_full_trainset: Do not split the dataset into folds and just return a trainset as is,
-# built from the whole dataset.
-trainSet = data.build_full_trainset()
-
-# Using SVD() model for recommendation
-algo = SVD()
-algo.fit(trainSet)
-
-print("Computing recommendations...")
-# fetching anti_dataset to recommend, excluding movies rated by testsubject
-testSet = LD.BuildAntiTestSetForUser(testSubject, trainSet)
-# making prediction
-predictions = algo.test(testSet)
-
-print("\nWe recommend:")
-recommendations = []
-for userID, movieID, actualRating, estimatedRating, _ in predictions:
-    intMovieID = int(movieID)
-    recommendations.append((intMovieID, estimatedRating))
-
-# sorting in descending order based on estimated rating
-recommendations.sort(key=lambda x: x[1], reverse=True)
-
-# finally recommending top 10 estimated high rating movies for particular testSubject.
-for ratings in recommendations[:10]:
-    print(ld.getMovieName(ratings[0]))
-"""
-
-
 def LoadMovieLensData():
-    ml = LD.Load_Data()
+    ml = Load_Data()
     print("Loading movie ratings...")
     data = ml.loadRatingDataset()
     print("\nComputing movie popularity ranks so we can measure novelty later...")
     rankings = ml.getPopularityRanks()
-    return (data, rankings)
+    return (ml, data, rankings)
 
 
 np.random.seed(0)
@@ -81,7 +24,7 @@ random.seed(0)
 
 
 # Load up common data set for the recommender algorithms
-(evaluationData, rankings) = LoadMovieLensData()
+(ml, evaluationData, rankings) = LoadMovieLensData()
 
 # Construct an Evaluator to, you know, evaluate them
 evaluator = Evaluator(evaluationData, rankings)
@@ -90,9 +33,13 @@ evaluator = Evaluator(evaluationData, rankings)
 SVDAlgorithm = SVD(random_state=10)
 evaluator.AddAlgorithm(SVDAlgorithm, "SVD")
 
+contentKNN = ContentKNNAlgorithm()
+evaluator.AddAlgorithm(contentKNN, "ContentKNN")
+
 # Just make random recommendations
 Random = NormalPredictor()
 evaluator.AddAlgorithm(Random, "Random")
 
-# Fight!
 evaluator.Evaluate(True)
+
+evaluator.SampleTopNRecs(ml)
